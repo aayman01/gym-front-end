@@ -1,26 +1,199 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+@custom-variant dark (&:is(.dark *));
+
+/* Light theme (default when .dark class is absent) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf7f7;
+  --foreground: #1a0a0a;
+  --card: #ffffff;
+  --card-foreground: #1a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #1a0a0a;
+  --primary: #f20d0d;
+  --primary-foreground: #ffffff;
+  --secondary: #f5eaea;
+  --secondary-foreground: #492222;
+  --muted: #f0e8e8;
+  --muted-foreground: #6b4444;
+  --accent: rgba(242, 13, 13, 0.08);
+  --accent-foreground: #1a0a0a;
+  --destructive: #d40b0b;
+  --border: rgba(242, 13, 13, 0.12);
+  --input: rgba(242, 13, 13, 0.06);
+  --ring: rgba(242, 13, 13, 0.35);
+  --chart-1: #f20d0d;
+  --chart-2: #492222;
+  --chart-3: #c4a0a0;
+  --chart-4: #faf7f7;
+  --chart-5: #f5f0f0;
+  --radius: 0.125rem;
+  --sidebar: #f5f0f0;
+  --sidebar-foreground: #1a0a0a;
+  --sidebar-primary: #f20d0d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(242, 13, 13, 0.08);
+  --sidebar-accent-foreground: #1a0a0a;
+  --sidebar-border: rgba(242, 13, 13, 0.12);
+  --sidebar-ring: rgba(242, 13, 13, 0.35);
+  --surface-dim: #f5f0f0;
+  --surface-container: #ffffff;
+
+  --status-success-bg: rgba(16, 185, 129, 0.15);
+  --status-success-fg: #047857;
+  --status-warning-bg: rgba(245, 158, 11, 0.15);
+  --status-warning-fg: #b45309;
+  --status-info-bg: rgba(59, 130, 246, 0.15);
+  --status-info-fg: #1d4ed8;
+  --status-processing-bg: rgba(234, 179, 8, 0.15);
+  --status-processing-fg: #a16207;
+  --status-shipped-bg: rgba(99, 102, 241, 0.15);
+  --status-shipped-fg: #4338ca;
+  --status-danger-bg: rgba(242, 13, 13, 0.12);
+  --status-danger-fg: #b91c1c;
+  --status-neutral-bg: rgba(107, 68, 68, 0.1);
+  --status-neutral-fg: #6b4444;
+
+  --chart-grid: rgba(242, 13, 13, 0.08);
+  --chart-tooltip-border: rgba(242, 13, 13, 0.15);
+  --login-glow-1: rgba(242, 13, 13, 0.1);
+  --login-glow-2: rgba(242, 13, 13, 0.06);
+  --login-overlay-start: rgba(250, 247, 247, 0.2);
+  --login-overlay-end: rgba(250, 247, 247, 0.92);
+}
+
+/* Dark theme — Crimson Forge look */
+.dark {
+  --background: #221010;
+  --foreground: #ffffff;
+  --card: #2a1414;
+  --card-foreground: #ffffff;
+  --popover: #2a1414;
+  --popover-foreground: #ffffff;
+  --primary: #f20d0d;
+  --primary-foreground: #ffffff;
+  --secondary: #492222;
+  --secondary-foreground: #ffffff;
+  --muted: #331818;
+  --muted-foreground: #c4a0a0;
+  --accent: rgba(242, 13, 13, 0.1);
+  --accent-foreground: #ffffff;
+  --destructive: #f20d0d;
+  --border: rgba(242, 13, 13, 0.1);
+  --input: rgba(242, 13, 13, 0.05);
+  --ring: rgba(242, 13, 13, 0.5);
+  --chart-1: #f20d0d;
+  --chart-2: #492222;
+  --chart-3: #331818;
+  --chart-4: #221010;
+  --chart-5: #140808;
+  --sidebar: #140808;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #f20d0d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(242, 13, 13, 0.1);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(242, 13, 13, 0.1);
+  --sidebar-ring: rgba(242, 13, 13, 0.5);
+  --surface-dim: #140808;
+  --surface-container: #2a1414;
+
+  --status-success-bg: rgba(16, 185, 129, 0.2);
+  --status-success-fg: #34d399;
+  --status-warning-bg: rgba(245, 158, 11, 0.2);
+  --status-warning-fg: #fbbf24;
+  --status-info-bg: rgba(59, 130, 246, 0.2);
+  --status-info-fg: #60a5fa;
+  --status-processing-bg: rgba(234, 179, 8, 0.2);
+  --status-processing-fg: #facc15;
+  --status-shipped-bg: rgba(99, 102, 241, 0.2);
+  --status-shipped-fg: #818cf8;
+  --status-danger-bg: rgba(242, 13, 13, 0.2);
+  --status-danger-fg: #f87171;
+  --status-neutral-bg: rgba(196, 160, 160, 0.15);
+  --status-neutral-fg: #c4a0a0;
+
+  --chart-grid: rgba(242, 13, 13, 0.08);
+  --chart-tooltip-border: rgba(242, 13, 13, 0.15);
+  --login-glow-1: rgba(242, 13, 13, 0.18);
+  --login-glow-2: rgba(242, 13, 13, 0.12);
+  --login-overlay-start: rgba(20, 8, 8, 0.2);
+  --login-overlay-end: rgba(20, 8, 8, 0.85);
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-lexend);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-container: var(--surface-container);
+  --radius-sm: var(--radius);
+  --radius-md: calc(var(--radius) * 2);
+  --radius-lg: calc(var(--radius) * 3);
+  --radius-xl: calc(var(--radius) * 4);
+  --radius-2xl: calc(var(--radius) * 5);
+  --radius-3xl: calc(var(--radius) * 6);
+  --radius-4xl: calc(var(--radius) * 8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+  }
+  html {
+    @apply font-sans;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
 }
