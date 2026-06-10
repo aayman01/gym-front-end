@@ -7,7 +7,10 @@ import { FALLBACK_PRODUCTS } from "@/lib/fallback-home-data";
 import { usePublicProducts } from "@/hooks/api/storefront/use-public-products";
 
 export function FeaturedProducts() {
-  const { data, isLoading, isError } = usePublicProducts({ limit: 8 });
+  const { data, isLoading, isError } = usePublicProducts({
+    limit: 8,
+    isFeature: true,
+  });
   const products =
     !isError && data?.data && data.data.length > 0
       ? data.data

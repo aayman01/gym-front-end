@@ -34,6 +34,7 @@ export type PublicProductsQuery = {
   search?: string;
   categorySlug?: string;
   minRating?: number;
+  isFeature?: boolean;
 };
 
 export type PublicProductsListPayload = {
