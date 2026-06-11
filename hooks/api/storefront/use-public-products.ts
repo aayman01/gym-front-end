@@ -16,7 +16,7 @@ export const PUBLIC_PRODUCT_QUERY_KEYS = {
 
 export async function getPublicProducts(query: PublicProductsQuery = {}) {
   return api.get<PublicProductsListPayload>(BASE_URL, {
-    params: { page: 1, limit: 8, ...query },
+    params: { page: 1, limit: 12, ...query },
   });
 }
 

@@ -14,21 +14,23 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <Link href="#categories" className="transition-colors hover:text-foreground">
+          <Link href="/#categories" className="transition-colors hover:text-foreground">
             Categories
           </Link>
-          <Link href="#products" className="transition-colors hover:text-foreground">
+          <Link href="/products" className="transition-colors hover:text-foreground">
             Products
           </Link>
-          <Link href="#reviews" className="transition-colors hover:text-foreground">
+          <Link href="/#reviews" className="transition-colors hover:text-foreground">
             Reviews
           </Link>
         </nav>
 
-        <Button variant="outline" size="sm">
-          <ShoppingBag />
-          Shop Now
-        </Button>
+        <Link href="/products">
+          <Button variant="outline" size="sm">
+            <ShoppingBag />
+            Shop Now
+          </Button>
+        </Link>
       </div>
     </header>
   );
