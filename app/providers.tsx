@@ -1,6 +1,7 @@
 "use client";
 
 import { SmoothScrollProvider } from "@/components/smooth-scroll-provider";
+import { SiteSettingsHydrator } from "@/components/site-settings-hydrator";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -19,6 +20,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SiteSettingsHydrator />
       <SmoothScrollProvider>{children}</SmoothScrollProvider>
     </QueryClientProvider>
   );
