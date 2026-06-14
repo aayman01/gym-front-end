@@ -1,7 +1,5 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
 import { ProductsView } from "@/components/products/products-view";
 
 export const metadata: Metadata = {
@@ -39,14 +37,8 @@ function ProductsLoading() {
 
 export default function ProductsPage() {
   return (
-    <div className="flex min-h-full flex-1 flex-col">
-      <SiteHeader />
-      <main className="flex-1">
-        <Suspense fallback={<ProductsLoading />}>
-          <ProductsView />
-        </Suspense>
-      </main>
-      <SiteFooter />
-    </div>
+    <Suspense fallback={<ProductsLoading />}>
+      <ProductsView />
+    </Suspense>
   );
 }
