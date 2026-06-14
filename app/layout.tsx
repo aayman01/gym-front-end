@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Lexend } from "next/font/google";
+import { SiteShell } from "@/components/layout/site-shell";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -24,7 +25,9 @@ export default function RootLayout({
       className={`${lexend.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          <SiteShell>{children}</SiteShell>
+        </Providers>
       </body>
     </html>
   );

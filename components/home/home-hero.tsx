@@ -75,9 +75,14 @@ export function HomeHero() {
 
         <Reveal delay={0.1} className="relative">
           <motion.div
-            className="relative mx-auto aspect-[4/5] max-w-md overflow-hidden rounded-[2rem] border border-border/60 bg-[linear-gradient(180deg,var(--surface-container),var(--surface-dim))] p-6 shadow-[0_30px_80px_rgba(242,13,13,0.15)]"
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="relative mx-auto aspect-[4/5] max-w-md transform-gpu overflow-hidden rounded-[2rem] border border-border/60 bg-[linear-gradient(180deg,var(--surface-container),var(--surface-dim))] p-6 shadow-[0_30px_80px_rgba(242,13,13,0.15)]"
+            animate={{ y: -10 }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: [0.37, 0, 0.63, 1],
+            }}
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(242,13,13,0.25),transparent_55%)]" />
             <div className="relative flex h-full flex-col justify-between">
