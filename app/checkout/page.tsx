@@ -1,125 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, CheckCircle, Loader2, Package, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  LogIn,
+  Loader2,
+  MapPin,
+  Package,
+  Truck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatPrice } from "@/lib/format-price";
+import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/api/storefront/use-cart";
 import {
   usePaymentMethods,
   usePlaceOrder,
   useShippingMethods,
 } from "@/hooks/api/storefront/use-checkout";
-import { cn } from "@/lib/utils";
+import { useCustomerSession } from "@/hooks/api/storefront/use-customer-auth";
+import { useCustomerAddresses } from "@/hooks/api/storefront/use-customer-addresses";
 import type { PlacedOrder } from "@/types/cart";
-
-const addressSchema = z.object({
-  recipientName: z.string().min(1, "Name is required"),
-  email: z.string().email("Valid email is required"),
-  phone: z.string().min(1, "Phone is required"),
-  addressLine1: z.string().min(1, "Address is required"),
-  addressLine2: z.string().optional(),
-  city: z.string().min(1, "City is required"),
-  stateOrDivision: z.string().min(1, "State/Division is required"),
-  postalCode: z.string().optional(),
-  country: z.string().length(2, "2-letter country code required"),
-});
-
-type AddressFormValues = z.infer<typeof addressSchema>;
-
-const inputCls =
-  "rounded-md border border-border/60 bg-card/60 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/60 w-full";
-
-function AddressFields({
-  register,
-  errors,
-  prefix,
-}: {
-  register: ReturnType<typeof useForm<AddressFormValues>>["register"];
-  errors: ReturnType<typeof useForm<AddressFormValues>>["formState"]["errors"];
-  prefix?: string;
-}) {
-  const field = (name: keyof AddressFormValues) =>
-    prefix ? (`${prefix}.${name}` as keyof AddressFormValues) : name;
-
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <div className="sm:col-span-2 space-y-1.5">
-        <Label>Full name</Label>
-        <Input className={inputCls} placeholder="John Doe" {...register(field("recipientName"))} />
-        {errors[field("recipientName")] && (
-          <p className="text-xs text-destructive">{errors[field("recipientName")]?.message as string}</p>
-        )}
-      </div>
-
-      <div className="space-y-1.5">
-        <Label>Email</Label>
-        <Input className={inputCls} type="email" placeholder="you@example.com" {...register(field("email"))} />
-        {errors[field("email")] && (
-          <p className="text-xs text-destructive">{errors[field("email")]?.message as string}</p>
-        )}
-      </div>
-
-      <div className="space-y-1.5">
-        <Label>Phone</Label>
-        <Input className={inputCls} placeholder="+1 555 000 0000" {...register(field("phone"))} />
-        {errors[field("phone")] && (
-          <p className="text-xs text-destructive">{errors[field("phone")]?.message as string}</p>
-        )}
-      </div>
-
-      <div className="sm:col-span-2 space-y-1.5">
-        <Label>Address line 1</Label>
-        <Input className={inputCls} placeholder="Street address" {...register(field("addressLine1"))} />
-        {errors[field("addressLine1")] && (
-          <p className="text-xs text-destructive">{errors[field("addressLine1")]?.message as string}</p>
-        )}
-      </div>
-
-      <div className="sm:col-span-2 space-y-1.5">
-        <Label>Address line 2 (optional)</Label>
-        <Input className={inputCls} placeholder="Apartment, suite, etc." {...register(field("addressLine2"))} />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label>City</Label>
-        <Input className={inputCls} placeholder="City" {...register(field("city"))} />
-        {errors[field("city")] && (
-          <p className="text-xs text-destructive">{errors[field("city")]?.message as string}</p>
-        )}
-      </div>
-
-      <div className="space-y-1.5">
-        <Label>State / Division</Label>
-        <Input className={inputCls} placeholder="State" {...register(field("stateOrDivision"))} />
-        {errors[field("stateOrDivision")] && (
-          <p className="text-xs text-destructive">{errors[field("stateOrDivision")]?.message as string}</p>
-        )}
-      </div>
-
-      <div className="space-y-1.5">
-        <Label>Postal code (optional)</Label>
-        <Input className={inputCls} placeholder="10001" {...register(field("postalCode"))} />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label>Country (2-letter code)</Label>
-        <Input className={inputCls} placeholder="US" maxLength={2} {...register(field("country"))} />
-        {errors[field("country")] && (
-          <p className="text-xs text-destructive">{errors[field("country")]?.message as string}</p>
-        )}
-      </div>
-    </div>
-  );
-}
+import type { CustomerAddress } from "@/types/customer";
 
 const checkoutSchema = z.object({
   recipientName: z.string().min(1, "Name is required"),
@@ -134,29 +44,181 @@ const checkoutSchema = z.object({
   notes: z.string().optional(),
 });
 
-type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+type CheckoutValues = z.infer<typeof checkoutSchema>;
+
+const inputCls =
+  "rounded-md border border-border/60 bg-card/60 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/60 w-full";
+
+function AddressFields({
+  register,
+  errors,
+}: {
+  register: ReturnType<typeof useForm<CheckoutValues>>["register"];
+  errors: ReturnType<typeof useForm<CheckoutValues>>["formState"]["errors"];
+}) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="sm:col-span-2 space-y-1.5">
+        <Label>Full name</Label>
+        <Input className={inputCls} placeholder="John Doe" {...register("recipientName")} />
+        {errors.recipientName && (
+          <p className="text-xs text-destructive">{errors.recipientName.message}</p>
+        )}
+      </div>
+      <div className="space-y-1.5">
+        <Label>Email</Label>
+        <Input className={inputCls} type="email" placeholder="you@example.com" {...register("email")} />
+        {errors.email && (
+          <p className="text-xs text-destructive">{errors.email.message}</p>
+        )}
+      </div>
+      <div className="space-y-1.5">
+        <Label>Phone</Label>
+        <Input className={inputCls} placeholder="+1 555 000 0000" {...register("phone")} />
+        {errors.phone && (
+          <p className="text-xs text-destructive">{errors.phone.message}</p>
+        )}
+      </div>
+      <div className="sm:col-span-2 space-y-1.5">
+        <Label>Address line 1</Label>
+        <Input className={inputCls} placeholder="Street address" {...register("addressLine1")} />
+        {errors.addressLine1 && (
+          <p className="text-xs text-destructive">{errors.addressLine1.message}</p>
+        )}
+      </div>
+      <div className="sm:col-span-2 space-y-1.5">
+        <Label>Address line 2 (optional)</Label>
+        <Input className={inputCls} placeholder="Apartment, suite, etc." {...register("addressLine2")} />
+      </div>
+      <div className="space-y-1.5">
+        <Label>City</Label>
+        <Input className={inputCls} placeholder="City" {...register("city")} />
+        {errors.city && <p className="text-xs text-destructive">{errors.city.message}</p>}
+      </div>
+      <div className="space-y-1.5">
+        <Label>State / Division</Label>
+        <Input className={inputCls} placeholder="State" {...register("stateOrDivision")} />
+        {errors.stateOrDivision && (
+          <p className="text-xs text-destructive">{errors.stateOrDivision.message}</p>
+        )}
+      </div>
+      <div className="space-y-1.5">
+        <Label>Postal code (optional)</Label>
+        <Input className={inputCls} placeholder="10001" {...register("postalCode")} />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Country (2-letter code)</Label>
+        <Input className={inputCls} placeholder="US" maxLength={2} {...register("country")} />
+        {errors.country && (
+          <p className="text-xs text-destructive">{errors.country.message}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SavedAddressPicker({
+  addresses,
+  onSelect,
+}: {
+  addresses: CustomerAddress[];
+  onSelect: (addr: CustomerAddress) => void;
+}) {
+  if (addresses.length === 0) return null;
+  return (
+    <div className="mb-4 space-y-2">
+      <p className="text-sm font-medium text-muted-foreground">
+        Saved addresses — select one to prefill:
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {addresses.map((addr) => (
+          <button
+            key={addr.id}
+            type="button"
+            onClick={() => onSelect(addr)}
+            className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-card/60 px-3 py-1.5 text-xs transition hover:border-primary/60"
+          >
+            <MapPin className="size-3 text-primary" />
+            {addr.label ?? addr.city}
+            {addr.isDefault && (
+              <span className="ml-0.5 text-[10px] text-primary">(default)</span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const { data: cart, isLoading: cartLoading } = useCart();
   const { data: shippingMethods = [], isLoading: shippingLoading } = useShippingMethods();
   const { data: paymentMethods = [] } = usePaymentMethods();
+  const { data: customer } = useCustomerSession();
+  const { data: savedAddresses = [] } = useCustomerAddresses();
   const placeOrder = usePlaceOrder();
 
   const [selectedShippingId, setSelectedShippingId] = useState<string | null>(null);
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
 
-  const selectedShipping = shippingMethods.find((m) => m.id === selectedShippingId) ?? shippingMethods[0] ?? null;
-  const codMethod = paymentMethods.find((m) => m.code?.toLowerCase() === "cod") ?? paymentMethods[0] ?? null;
+  const selectedShipping =
+    shippingMethods.find((m) => m.id === selectedShippingId) ??
+    shippingMethods[0] ??
+    null;
+
+  const codMethod =
+    paymentMethods.find((m) => m.code?.toLowerCase() === "cod") ??
+    paymentMethods[0] ??
+    null;
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
-  } = useForm<CheckoutFormValues>({
+  } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: { country: "US" },
   });
+
+  // Prefill from session when customer loads
+  useEffect(() => {
+    if (!customer) return;
+    const defaultAddr = savedAddresses.find((a) => a.isDefault) ?? savedAddresses[0];
+    if (defaultAddr) {
+      reset({
+        recipientName: defaultAddr.recipientName,
+        email: customer.email,
+        phone: defaultAddr.phone,
+        addressLine1: defaultAddr.addressLine1,
+        addressLine2: defaultAddr.addressLine2 ?? "",
+        city: defaultAddr.city,
+        stateOrDivision: defaultAddr.stateOrDivision,
+        postalCode: defaultAddr.postalCode ?? "",
+        country: defaultAddr.country,
+      });
+    } else {
+      reset((prev) => ({
+        ...prev,
+        email: customer.email,
+        recipientName: `${customer.firstName} ${customer.lastName}`.trim(),
+      }));
+    }
+  }, [customer, savedAddresses, reset]);
+
+  const handleAddressSelect = (addr: CustomerAddress) => {
+    reset((prev) => ({
+      ...prev,
+      recipientName: addr.recipientName,
+      phone: addr.phone,
+      addressLine1: addr.addressLine1,
+      addressLine2: addr.addressLine2 ?? "",
+      city: addr.city,
+      stateOrDivision: addr.stateOrDivision,
+      postalCode: addr.postalCode ?? "",
+      country: addr.country,
+    }));
+  };
 
   if (placedOrder) {
     return <OrderSuccess order={placedOrder} />;
@@ -184,7 +246,6 @@ export default function CheckoutPage() {
       toast.error("No payment method available");
       return;
     }
-
     try {
       const result = await placeOrder.mutateAsync({
         paymentMethodId: codMethod.id,
@@ -214,8 +275,7 @@ export default function CheckoutPage() {
       });
       setPlacedOrder(result.order);
     } catch (err) {
-      const msg = (err as { message?: string })?.message ?? "Failed to place order";
-      toast.error(msg);
+      toast.error((err as { message?: string })?.message ?? "Failed to place order");
     }
   });
 
@@ -231,6 +291,23 @@ export default function CheckoutPage() {
 
       <h1 className="mb-8 text-2xl font-bold tracking-tight">Checkout</h1>
 
+      {/* Guest prompt */}
+      {!customer && (
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-4 text-sm">
+          <LogIn className="size-4 shrink-0 text-primary" />
+          <p className="text-muted-foreground">
+            <Link href="/login?redirect=/checkout" className="font-medium text-primary hover:underline">
+              Sign in
+            </Link>{" "}
+            or{" "}
+            <Link href="/register?redirect=/checkout" className="font-medium text-primary hover:underline">
+              register
+            </Link>{" "}
+            to save addresses and track your order.
+          </p>
+        </div>
+      )}
+
       <form onSubmit={onSubmit}>
         <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
           <div className="space-y-8">
@@ -239,6 +316,12 @@ export default function CheckoutPage() {
                 <Truck className="size-4 text-primary" />
                 Shipping &amp; contact
               </h2>
+              {savedAddresses.length > 0 && (
+                <SavedAddressPicker
+                  addresses={savedAddresses}
+                  onSelect={handleAddressSelect}
+                />
+              )}
               <AddressFields register={register} errors={errors} />
             </section>
 
@@ -265,8 +348,7 @@ export default function CheckoutPage() {
                             name="shipping"
                             value={method.id}
                             checked={
-                              (selectedShippingId ?? shippingMethods[0]?.id) ===
-                              method.id
+                              (selectedShippingId ?? shippingMethods[0]?.id) === method.id
                             }
                             onChange={() => setSelectedShippingId(method.id)}
                             className="accent-primary"
@@ -320,7 +402,6 @@ export default function CheckoutPage() {
 
           <div className="h-fit rounded-2xl border border-border/60 bg-card/60 p-6 backdrop-blur-sm">
             <h2 className="mb-4 font-semibold">Order summary</h2>
-
             {cartLoading ? (
               <div className="space-y-2 animate-pulse">
                 {[1, 2].map((i) => (
@@ -339,9 +420,7 @@ export default function CheckoutPage() {
                     </span>
                     <span className="shrink-0 font-medium">
                       {formatPrice(
-                        (
-                          parseFloat(item.variant?.price ?? "0") * item.quantity
-                        ).toFixed(2),
+                        (parseFloat(item.variant?.price ?? "0") * item.quantity).toFixed(2),
                       )}
                     </span>
                   </li>
@@ -389,6 +468,8 @@ export default function CheckoutPage() {
 }
 
 function OrderSuccess({ order }: { order: PlacedOrder }) {
+  const { data: customer } = useCustomerSession();
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-20 text-center">
       <CheckCircle className="mx-auto mb-4 size-16 text-green-500" />
@@ -419,9 +500,14 @@ function OrderSuccess({ order }: { order: PlacedOrder }) {
         </div>
       </div>
 
-      <Button className="mt-8" render={<Link href="/products" />}>
-        Continue shopping
-      </Button>
+      <div className="mt-8 flex flex-col items-center gap-3">
+        {customer && (
+          <Button variant="outline" render={<Link href="/account/orders" />}>
+            View in order history
+          </Button>
+        )}
+        <Button render={<Link href="/products" />}>Continue shopping</Button>
+      </div>
     </div>
   );
 }

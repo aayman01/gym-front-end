@@ -8,6 +8,7 @@ import { useNavbarVisibility } from "@/hooks/use-navbar-visibility";
 import { useSiteSettingsStore } from "@/stores/site-settings-store";
 import { useCartStore } from "@/stores/cart-store";
 import { useCart } from "@/hooks/api/storefront/use-cart";
+import { useCustomerSession } from "@/hooks/api/storefront/use-customer-auth";
 
 function HeaderLogo({ size = "md" }: { size?: "sm" | "md" }) {
   const headerLogoUrl = useSiteSettingsStore(
@@ -69,6 +70,7 @@ function HeaderActions() {
     "size-5 stroke-[1.5] text-muted-foreground transition-colors hover:text-foreground md:size-6";
   const toggleCart = useCartStore((s) => s.toggleDrawer);
   const { data: cart } = useCart();
+  const { data: customer } = useCustomerSession();
   const itemCount = cart?.itemCount ?? 0;
 
   return (
@@ -93,13 +95,16 @@ function HeaderActions() {
           </span>
         )}
       </button>
-      <button
-        type="button"
-        aria-label="Account (coming soon)"
-        className="flex items-center justify-center"
+      <Link
+        href={customer ? "/account" : "/login"}
+        aria-label={customer ? "Account" : "Sign in"}
+        className="relative flex items-center justify-center"
       >
         <User className={iconClass} />
-      </button>
+        {customer && (
+          <span className="absolute -right-1 -top-1 size-2 rounded-full bg-green-500" />
+        )}
+      </Link>
     </div>
   );
 }
