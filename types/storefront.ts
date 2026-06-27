@@ -58,6 +58,58 @@ export type PublicProductsQuery = {
   sortOrder?: "asc" | "desc";
 };
 
+export type PublicProductDetail = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  description: string | null;
+  basePrice: string;
+  rating: string;
+  type: string;
+  sellingUnit: string;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  metaKeywords: string | null;
+  thumbnail: { id: string; url: string; mimeType: string } | null;
+  images: {
+    id: string;
+    order: number;
+    image: { id: string; url: string; mimeType: string };
+  }[];
+  brand: {
+    id: string;
+    name: string;
+    slug: string;
+    logo: { id: string; url: string } | null;
+  } | null;
+  category: { id: string; name: string; slug: string };
+  attributes: {
+    id: string;
+    name: string;
+    options: { id: string; value: string; order: number }[];
+  }[];
+  variants: {
+    id: string;
+    sku: string;
+    price: string;
+    status: string;
+    isBase: boolean;
+    displayImage: { id: string; url: string } | null;
+    availableStock: number;
+    attributeOptions: {
+      attribute: { id: string; name: string };
+      option: { id: string; value: string };
+    }[];
+    sampleImages: {
+      id: string;
+      order: number;
+      image: { id: string; url: string };
+    }[];
+  }[];
+  relatedProducts: PublicProductCard[];
+};
+
 export type PaginationMeta = {
   total: number;
   page: number;

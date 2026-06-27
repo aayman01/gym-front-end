@@ -6,6 +6,8 @@ import { Heart, Search, ShoppingCart, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavbarVisibility } from "@/hooks/use-navbar-visibility";
 import { useSiteSettingsStore } from "@/stores/site-settings-store";
+import { useCartStore } from "@/stores/cart-store";
+import { useCart } from "@/hooks/api/storefront/use-cart";
 
 function HeaderLogo({ size = "md" }: { size?: "sm" | "md" }) {
   const headerLogoUrl = useSiteSettingsStore(
@@ -65,6 +67,9 @@ function HeaderSearch({ className }: { className?: string }) {
 function HeaderActions() {
   const iconClass =
     "size-5 stroke-[1.5] text-muted-foreground transition-colors hover:text-foreground md:size-6";
+  const toggleCart = useCartStore((s) => s.toggleDrawer);
+  const { data: cart } = useCart();
+  const itemCount = cart?.itemCount ?? 0;
 
   return (
     <div className="flex shrink-0 items-center gap-4 md:gap-5">
@@ -77,10 +82,16 @@ function HeaderActions() {
       </button>
       <button
         type="button"
-        aria-label="Cart (coming soon)"
-        className="flex items-center justify-center"
+        aria-label="Cart"
+        onClick={toggleCart}
+        className="relative flex items-center justify-center"
       >
         <ShoppingCart className={iconClass} />
+        {itemCount > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+            {itemCount > 99 ? "99+" : itemCount}
+          </span>
+        )}
       </button>
       <button
         type="button"

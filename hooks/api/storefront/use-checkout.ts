@@ -1,0 +1,56 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import type {
+  CheckoutPreview,
+  PaymentMethod,
+  PlacedOrder,
+  PlaceOrderInput,
+  ShippingMethod,
+} from "@/types/cart";
+
+const BASE_URL = "/user/checkout";
+
+export const CHECKOUT_QUERY_KEYS = {
+  shippingMethods: ["checkout-shipping-methods"] as const,
+  paymentMethods: ["checkout-payment-methods"] as const,
+};
+
+export async function getShippingMethods() {
+  return api.get<ShippingMethod[]>(`${BASE_URL}/shipping-methods`);
+}
+
+export async function getPaymentMethods() {
+  return api.get<PaymentMethod[]>(`${BASE_URL}/payment-methods`);
+}
+
+export async function previewCheckout(payload: {
+  shippingMethodId?: string;
+}) {
+  return api.post<CheckoutPreview>(`${BASE_URL}/preview`, payload);
+}
+
+export async function placeOrder(payload: PlaceOrderInput) {
+  return api.post<{ order: PlacedOrder }>(`${BASE_URL}/place-order`, payload);
+}
+
+export function useShippingMethods() {
+  return useQuery({
+    queryKey: CHECKOUT_QUERY_KEYS.shippingMethods,
+    queryFn: getShippingMethods,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function usePaymentMethods() {
+  return useQuery({
+    queryKey: CHECKOUT_QUERY_KEYS.paymentMethods,
+    queryFn: getPaymentMethods,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function usePlaceOrder() {
+  return useMutation({
+    mutationFn: placeOrder,
+  });
+}
