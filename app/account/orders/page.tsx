@@ -1,10 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Package, ShoppingBag } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Package,
+  ShoppingBag,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format-price";
 import { useCustomerOrders } from "@/hooks/api/storefront/use-customer-orders";
+
+const PAGE_SIZE = 10;
 
 function statusColor(status: string) {
   switch (status.toUpperCase()) {
@@ -27,8 +36,10 @@ function statusColor(status: string) {
 }
 
 export default function OrdersPage() {
-  const { data, isLoading } = useCustomerOrders(1, 20);
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useCustomerOrders(page, PAGE_SIZE);
   const orders = data?.data ?? [];
+  const meta = data?.meta;
 
   return (
     <div className="space-y-6">
@@ -94,6 +105,32 @@ export default function OrdersPage() {
             </li>
           ))}
         </ul>
+      )}
+
+      {meta && meta.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!meta.hasPrevious}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            <ChevronLeft className="size-4" />
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {meta.page} of {meta.totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!meta.hasNext}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
       )}
     </div>
   );

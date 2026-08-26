@@ -15,6 +15,11 @@ export type UpdateProfileInput = {
   phone?: string | null;
 };
 
+export type ChangePasswordInput = {
+  currentPassword: string;
+  newPassword: string;
+};
+
 export type CustomerAddress = {
   id: string;
   customerId: string;
@@ -69,6 +74,7 @@ export type CustomerOrder = {
     quantity: number;
     unitPrice: string;
     lineTotal: string;
+    reviewId: string | null;
   }[];
   billing: {
     recipientName: string;

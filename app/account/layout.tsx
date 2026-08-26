@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { LayoutDashboard, LogOut, MapPin, Package, User } from "lucide-react";
+import { Heart, LayoutDashboard, LogOut, MapPin, Package, User } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useCustomerSession, useLogout } from "@/hooks/api/storefront/use-customer-auth";
@@ -13,6 +13,7 @@ const navItems = [
   { href: "/account/profile", label: "Profile", icon: User, exact: false },
   { href: "/account/addresses", label: "Addresses", icon: MapPin, exact: false },
   { href: "/account/orders", label: "Orders", icon: Package, exact: false },
+  { href: "/wishlist", label: "Wishlist", icon: Heart, exact: false },
 ];
 
 export default function AccountLayout({

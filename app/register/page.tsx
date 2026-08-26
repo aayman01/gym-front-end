@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRegister, useLogin } from "@/hooks/api/storefront/use-customer-auth";
 import { mergeCart } from "@/hooks/api/storefront/use-cart";
+import { mergeWishlist } from "@/hooks/api/storefront/use-wishlist";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -61,6 +62,7 @@ function RegisterForm() {
         password: values.password,
       });
       try { await mergeCart(); } catch { /* ignore */ }
+      try { await mergeWishlist(); } catch { /* ignore */ }
       toast.success("Account created! Welcome.");
       router.push(redirect);
     } catch (err) {

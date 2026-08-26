@@ -29,7 +29,17 @@ function useDebouncedValue<T>(value: T, delay = 400): T {
   return debounced;
 }
 
-export function ProductFilters() {
+type ProductFiltersProps = {
+  /** Hide the category selector (e.g. on a category page where the category is locked). */
+  hideCategory?: boolean;
+  /** Hide the brand selector (e.g. on a brand page where the brand is locked). */
+  hideBrand?: boolean;
+};
+
+export function ProductFilters({
+  hideCategory = false,
+  hideBrand = false,
+}: ProductFiltersProps = {}) {
   const { query, update, reset, hasFilters } = useFilterParams();
   const { data: categories } = usePublicCategories();
   const { data: brands } = usePublicBrands();
@@ -141,7 +151,7 @@ export function ProductFilters() {
       </div>
 
       {/* Categories */}
-      {categories && categories.length > 0 && (
+      {!hideCategory && categories && categories.length > 0 && (
         <div>
           <label className="mb-3 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Category
@@ -184,7 +194,7 @@ export function ProductFilters() {
       )}
 
       {/* Brands */}
-      {brands && brands.length > 0 && (
+      {!hideBrand && brands && brands.length > 0 && (
         <div>
           <label className="mb-3 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Brand

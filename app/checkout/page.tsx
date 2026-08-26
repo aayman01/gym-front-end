@@ -24,6 +24,7 @@ import { useCart } from "@/hooks/api/storefront/use-cart";
 import {
   usePaymentMethods,
   usePlaceOrder,
+  usePreviewCheckout,
   useShippingMethods,
 } from "@/hooks/api/storefront/use-checkout";
 import { useCustomerSession } from "@/hooks/api/storefront/use-customer-auth";
@@ -154,17 +155,26 @@ export default function CheckoutPage() {
   const { data: cart, isLoading: cartLoading } = useCart();
   const { data: shippingMethods = [], isLoading: shippingLoading } = useShippingMethods();
   const { data: paymentMethods = [] } = usePaymentMethods();
-  const { data: customer } = useCustomerSession();
+  const { data: customer, isLoading: customerLoading } = useCustomerSession();
   const { data: savedAddresses = [] } = useCustomerAddresses();
   const placeOrder = usePlaceOrder();
 
   const [selectedShippingId, setSelectedShippingId] = useState<string | null>(null);
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>();
 
   const selectedShipping =
     shippingMethods.find((m) => m.id === selectedShippingId) ??
     shippingMethods[0] ??
     null;
+
+  // Server-computed totals (includes tax). Only available for logged-in customers.
+  const { data: preview, isError: previewError, error: previewErr } = usePreviewCheckout({
+    shippingMethodId: selectedShipping?.id,
+    couponCode: appliedCoupon,
+    enabled: Boolean(customer) && (cart?.items?.length ?? 0) > 0,
+  });
 
   const codMethod =
     paymentMethods.find((m) => m.code?.toLowerCase() === "cod") ??
@@ -206,6 +216,14 @@ export default function CheckoutPage() {
     }
   }, [customer, savedAddresses, reset]);
 
+  useEffect(() => {
+    if (!appliedCoupon || !previewError) return;
+    toast.error(
+      (previewErr as { message?: string })?.message ?? "Could not apply coupon",
+    );
+    setAppliedCoupon(undefined);
+  }, [appliedCoupon, previewError, previewErr]);
+
   const handleAddressSelect = (addr: CustomerAddress) => {
     reset((prev) => ({
       ...prev,
@@ -237,9 +255,51 @@ export default function CheckoutPage() {
     );
   }
 
-  const subtotal = parseFloat(cart?.selectedTotal ?? "0");
-  const shippingCost = selectedShipping ? parseFloat(String(selectedShipping.price)) : 0;
-  const total = subtotal + shippingCost;
+  // Placing an order requires an authenticated customer (API is guarded).
+  if (!customerLoading && !customer) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-24 text-center">
+        <LogIn className="mx-auto mb-4 size-12 text-primary" />
+        <h1 className="text-2xl font-bold tracking-tight">Sign in to check out</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          You need an account to place an order. Your cart is saved and will be
+          waiting for you.
+        </p>
+        <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <Button render={<Link href="/login?redirect=/checkout" />}>
+            Sign in
+          </Button>
+          <Button
+            variant="outline"
+            render={<Link href="/register?redirect=/checkout" />}
+          >
+            Create an account
+          </Button>
+        </div>
+        <Button
+          variant="ghost"
+          className="mt-4"
+          render={<Link href="/cart" />}
+        >
+          Back to cart
+        </Button>
+      </div>
+    );
+  }
+
+  const subtotal = preview
+    ? parseFloat(preview.itemTotal)
+    : parseFloat(cart?.selectedTotal ?? "0");
+  const taxAmount = preview ? parseFloat(preview.taxAmount) : 0;
+  const discountAmount = preview ? parseFloat(preview.discountAmount ?? "0") : 0;
+  const shippingCost = preview
+    ? parseFloat(preview.shippingAmount)
+    : selectedShipping
+      ? parseFloat(String(selectedShipping.price))
+      : 0;
+  const total = preview
+    ? parseFloat(preview.totalAmount)
+    : subtotal + shippingCost;
 
   const onSubmit = handleSubmit(async (values) => {
     if (!codMethod) {
@@ -272,6 +332,7 @@ export default function CheckoutPage() {
           country: values.country,
         },
         notes: values.notes ?? null,
+        couponCode: appliedCoupon,
       });
       setPlacedOrder(result.order);
     } catch (err) {
@@ -290,23 +351,6 @@ export default function CheckoutPage() {
       </Link>
 
       <h1 className="mb-8 text-2xl font-bold tracking-tight">Checkout</h1>
-
-      {/* Guest prompt */}
-      {!customer && (
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-4 text-sm">
-          <LogIn className="size-4 shrink-0 text-primary" />
-          <p className="text-muted-foreground">
-            <Link href="/login?redirect=/checkout" className="font-medium text-primary hover:underline">
-              Sign in
-            </Link>{" "}
-            or{" "}
-            <Link href="/register?redirect=/checkout" className="font-medium text-primary hover:underline">
-              register
-            </Link>{" "}
-            to save addresses and track your order.
-          </p>
-        </div>
-      )}
 
       <form onSubmit={onSubmit}>
         <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
@@ -431,8 +475,20 @@ export default function CheckoutPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatPrice(cart?.selectedTotal ?? "0")}</span>
+                <span>{formatPrice(subtotal.toFixed(2))}</span>
               </div>
+              {taxAmount > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tax</span>
+                  <span>{formatPrice(taxAmount.toFixed(2))}</span>
+                </div>
+              )}
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-green-500">
+                  <span>Discount{preview?.couponCode ? ` (${preview.couponCode})` : ""}</span>
+                  <span>-{formatPrice(discountAmount.toFixed(2))}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
                 <span>
@@ -440,6 +496,35 @@ export default function CheckoutPage() {
                 </span>
               </div>
             </div>
+
+            <div className="mt-4 flex gap-2">
+              <Input
+                className={inputCls}
+                placeholder="Coupon code"
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!couponInput.trim()}
+                onClick={() => setAppliedCoupon(couponInput.trim().toUpperCase())}
+              >
+                Apply
+              </Button>
+            </div>
+            {appliedCoupon && discountAmount > 0 && (
+              <button
+                type="button"
+                className="mt-1 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setAppliedCoupon(undefined);
+                  setCouponInput("");
+                }}
+              >
+                Remove coupon
+              </button>
+            )}
 
             <div className="mt-4 flex justify-between border-t border-border/60 pt-4 font-semibold">
               <span>Total</span>

@@ -20,9 +20,13 @@ export async function getPublicProducts(query: PublicProductsQuery = {}) {
   });
 }
 
-export function usePublicProducts(query: PublicProductsQuery = {}) {
+export function usePublicProducts(
+  query: PublicProductsQuery = {},
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: PUBLIC_PRODUCT_QUERY_KEYS.list(query),
     queryFn: () => getPublicProducts(query),
+    enabled: options?.enabled ?? true,
   });
 }

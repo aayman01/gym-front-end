@@ -5,15 +5,22 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/home/product-card";
 import { usePublicProducts } from "@/hooks/api/storefront/use-public-products";
 import { useFilterParams } from "@/hooks/use-filter-params";
+import type { PublicProductsQuery } from "@/types/storefront";
 
 const LIMIT = 12;
 
-export function ProductGrid() {
+type ProductGridProps = {
+  /** Query values that always override the URL params (e.g. a locked category on a category page). */
+  forcedQuery?: Partial<PublicProductsQuery>;
+};
+
+export function ProductGrid({ forcedQuery }: ProductGridProps = {}) {
   const { query, update } = useFilterParams();
   const page = query.page ?? 1;
 
   const { data, isLoading, isError } = usePublicProducts({
     ...query,
+    ...forcedQuery,
     page,
     limit: LIMIT,
   });

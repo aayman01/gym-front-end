@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "@/hooks/api/storefront/use-customer-auth";
 import { mergeCart } from "@/hooks/api/storefront/use-cart";
+import { mergeWishlist } from "@/hooks/api/storefront/use-wishlist";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -38,6 +39,7 @@ function LoginForm() {
       await login.mutateAsync(values);
       // merge guest cart into authenticated cart silently
       try { await mergeCart(); } catch { /* ignore */ }
+      try { await mergeWishlist(); } catch { /* ignore */ }
       toast.success("Welcome back!");
       router.push(redirect);
     } catch (err) {

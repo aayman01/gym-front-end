@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProductGallery } from "@/components/products/pdp/product-gallery";
 import { VariantSelector } from "@/components/products/pdp/variant-selector";
 import { AddToCartForm } from "@/components/products/pdp/add-to-cart-form";
+import { ProductReviews } from "@/components/products/pdp/product-reviews";
 import { formatPrice } from "@/lib/format-price";
 import type { PublicProductDetail } from "@/types/storefront";
 
@@ -43,9 +44,12 @@ export function ProductDetailView({ product }: Props) {
         <div className="space-y-6">
           <div className="space-y-2">
             {product.brand && (
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              <Link
+                href={`/brands/${product.brand.slug}`}
+                className="inline-block text-xs font-semibold uppercase tracking-widest text-primary hover:underline"
+              >
                 {product.brand.name}
-              </p>
+              </Link>
             )}
             <h1 className="text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
               {product.title}
@@ -58,7 +62,14 @@ export function ProductDetailView({ product }: Props) {
                   <span className="font-medium">{rating.toFixed(1)}</span>
                 </div>
               )}
-              <Badge variant="secondary">{product.category.name}</Badge>
+              <Link href={`/categories/${product.category.slug}`}>
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer transition-colors hover:bg-secondary/70"
+                >
+                  {product.category.name}
+                </Badge>
+              </Link>
               <Badge variant="outline">{product.sellingUnit}</Badge>
             </div>
           </div>
@@ -97,6 +108,8 @@ export function ProductDetailView({ product }: Props) {
           )}
         </div>
       </div>
+
+      <ProductReviews productId={product.id} />
 
       {product.relatedProducts.length > 0 && (
         <section className="mt-16">

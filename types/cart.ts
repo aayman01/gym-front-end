@@ -44,7 +44,9 @@ export type CheckoutPreview = {
   itemTotal: string;
   taxAmount: string;
   shippingAmount: string;
+  discountAmount?: string;
   totalAmount: string;
+  couponCode?: string | null;
 };
 
 export type AddressInput = {
@@ -66,6 +68,7 @@ export type PlaceOrderInput = {
   shippingAddress?: AddressInput;
   billingAddress: BillingAddressInput;
   notes?: string | null;
+  couponCode?: string;
 };
 
 export type PlacedOrder = {
@@ -78,6 +81,7 @@ export type PlacedOrder = {
   itemTotal: string;
   taxAmount: string;
   shippingAmount: string;
+  discountAmount?: string;
   totalAmount: string;
   items: {
     id: string;

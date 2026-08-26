@@ -6,8 +6,28 @@ import { Button } from "@/components/ui/button";
 import { ProductFilters } from "./product-filters";
 import { ProductGrid } from "./product-grid";
 import { useFilterParams } from "@/hooks/use-filter-params";
+import type { PublicProductsQuery } from "@/types/storefront";
 
-export function ProductsView() {
+type ProductsViewProps = {
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  /** Query values locked for this view (e.g. a category slug on a category page). */
+  forcedQuery?: Partial<PublicProductsQuery>;
+  /** Hide the category selector in the filters panel. */
+  hideCategoryFilter?: boolean;
+  /** Hide the brand selector in the filters panel. */
+  hideBrandFilter?: boolean;
+};
+
+export function ProductsView({
+  eyebrow = "Catalog",
+  title = "All Supplements",
+  subtitle = "Browse our full range of performance-grade supplements.",
+  forcedQuery,
+  hideCategoryFilter = false,
+  hideBrandFilter = false,
+}: ProductsViewProps = {}) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const { hasFilters } = useFilterParams();
 
@@ -17,13 +37,13 @@ export function ProductsView() {
       <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-            Catalog
+            {eyebrow}
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-            All Supplements
+            {title}
           </h1>
           <p className="mt-2 text-base text-muted-foreground">
-            Browse our full range of performance-grade supplements.
+            {subtitle}
           </p>
         </div>
 
@@ -51,7 +71,10 @@ export function ProductsView() {
       {/* Mobile filter panel (above grid) */}
       {mobileFiltersOpen && (
         <div className="mb-6 rounded-xl border border-border/60 bg-card/80 p-5 backdrop-blur-sm md:hidden">
-          <ProductFilters />
+          <ProductFilters
+            hideCategory={hideCategoryFilter}
+            hideBrand={hideBrandFilter}
+          />
         </div>
       )}
 
@@ -60,13 +83,16 @@ export function ProductsView() {
         {/* Sticky sidebar */}
         <aside className="hidden w-60 shrink-0 md:block">
           <div className="sticky top-24 rounded-xl border border-border/60 bg-card/80 p-5 backdrop-blur-sm">
-            <ProductFilters />
+            <ProductFilters
+              hideCategory={hideCategoryFilter}
+              hideBrand={hideBrandFilter}
+            />
           </div>
         </aside>
 
         {/* Product grid */}
         <main className="min-w-0 flex-1">
-          <ProductGrid />
+          <ProductGrid forcedQuery={forcedQuery} />
         </main>
       </div>
     </div>

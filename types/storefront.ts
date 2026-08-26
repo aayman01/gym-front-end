@@ -119,8 +119,41 @@ export type PaginationMeta = {
   hasPrevious: boolean;
 };
 
+export type ProductReview = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  isVerifiedPurchase: boolean;
+  createdAt: string;
+  updatedAt: string;
+  images: { id: string; url: string }[];
+};
+
+export type ProductReviewsPayload = {
+  data: ProductReview[];
+  meta: PaginationMeta;
+};
+
 export type PublicProductsListPayload = {
   data: PublicProductCard[];
   meta: PaginationMeta;
   filters: PublicProductsQuery & { page: number; limit: number };
+};
+
+export type PublicBanner = {
+  id: string;
+  title: string;
+  description: string | null;
+  buttonText: string | null;
+  buttonLink: string | null;
+  mediaUrl: string | null;
+};
+
+export type PublicCollection = {
+  id: string;
+  title: string;
+  subTitle: string | null;
+  slug: string;
+  type: string;
+  products: PublicProductCard[];
 };

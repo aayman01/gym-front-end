@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { formatPriceRange } from "@/lib/format-price";
 import { cn } from "@/lib/utils";
+import { WishlistButton } from "@/components/products/wishlist-button";
 import type { PublicProductCard } from "@/types/storefront";
 
 type ProductCardProps = {
@@ -52,16 +53,28 @@ export function ProductCard({ product, className }: ProductCardProps) {
               <Package className="size-12 text-primary/70" />
             </div>
           )}
-          <Badge className="absolute left-3 top-3 bg-background/80 text-foreground backdrop-blur-sm">
-            {product.category.name}
-          </Badge>
+          <Link
+            href={`/categories/${product.category.slug}`}
+            className="absolute left-3 top-3 z-10"
+          >
+            <Badge className="bg-background/80 text-foreground backdrop-blur-sm transition-colors hover:bg-primary hover:text-primary-foreground">
+              {product.category.name}
+            </Badge>
+          </Link>
+          <WishlistButton
+            productId={product.id}
+            className="absolute right-3 top-3 z-10"
+          />
         </div>
 
         <CardHeader className="gap-2">
           {product.brand ? (
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <Link
+              href={`/brands/${product.brand.slug}`}
+              className="w-fit text-xs font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:text-primary"
+            >
               {product.brand.name}
-            </p>
+            </Link>
           ) : null}
           <CardTitle className="line-clamp-2 text-lg">{product.title}</CardTitle>
           {product.summary ? (

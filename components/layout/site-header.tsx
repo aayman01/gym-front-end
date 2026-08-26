@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Heart, Search, ShoppingCart, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavbarVisibility } from "@/hooks/use-navbar-visibility";
 import { useSiteSettingsStore } from "@/stores/site-settings-store";
 import { useCartStore } from "@/stores/cart-store";
 import { useCart } from "@/hooks/api/storefront/use-cart";
+import { useWishlist } from "@/hooks/api/storefront/use-wishlist";
 import { useCustomerSession } from "@/hooks/api/storefront/use-customer-auth";
 
 function HeaderLogo({ size = "md" }: { size?: "sm" | "md" }) {
@@ -49,19 +52,35 @@ function HeaderLogo({ size = "md" }: { size?: "sm" | "md" }) {
 }
 
 function HeaderSearch({ className }: { className?: string }) {
+  const router = useRouter();
+  const [term, setTerm] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = term.trim();
+    router.push(trimmed ? `/products?search=${encodeURIComponent(trimmed)}` : "/products");
+  };
+
   return (
-    <div className={className}>
+    <form onSubmit={handleSubmit} className={className} role="search">
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
+        <button
+          type="submit"
+          aria-label="Search"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 transition-colors hover:text-foreground"
+        >
+          <Search className="size-4" />
+        </button>
         <input
           type="search"
-          placeholder="Search"
-          readOnly
-          aria-label="Search (coming soon)"
-          className="h-10 w-full cursor-default rounded-full bg-white pl-11 pr-4 text-sm text-foreground placeholder:text-neutral-400 outline-none md:h-11"
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+          placeholder="Search supplements…"
+          aria-label="Search supplements"
+          className="h-10 w-full rounded-full bg-white pl-11 pr-4 text-sm text-foreground placeholder:text-neutral-400 outline-none md:h-11"
         />
       </div>
-    </div>
+    </form>
   );
 }
 
@@ -70,18 +89,25 @@ function HeaderActions() {
     "size-5 stroke-[1.5] text-muted-foreground transition-colors hover:text-foreground md:size-6";
   const toggleCart = useCartStore((s) => s.toggleDrawer);
   const { data: cart } = useCart();
+  const { data: wishlist } = useWishlist();
   const { data: customer } = useCustomerSession();
   const itemCount = cart?.itemCount ?? 0;
+  const wishlistCount = wishlist?.itemCount ?? 0;
 
   return (
     <div className="flex shrink-0 items-center gap-4 md:gap-5">
-      <button
-        type="button"
-        aria-label="Wishlist (coming soon)"
-        className="flex items-center justify-center"
+      <Link
+        href="/wishlist"
+        aria-label="Wishlist"
+        className="relative flex items-center justify-center"
       >
         <Heart className={iconClass} />
-      </button>
+        {wishlistCount > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+            {wishlistCount > 99 ? "99+" : wishlistCount}
+          </span>
+        )}
+      </Link>
       <button
         type="button"
         aria-label="Cart"

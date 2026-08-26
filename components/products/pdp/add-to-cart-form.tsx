@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAddToCart } from "@/hooks/api/storefront/use-cart";
 import { useCartStore } from "@/stores/cart-store";
+import { WishlistButton } from "@/components/products/wishlist-button";
 import type { PublicProductDetail } from "@/types/storefront";
 
 type Props = {
@@ -79,15 +80,22 @@ export function AddToCartForm({ product, selectedVariantId }: Props) {
         )}
       </div>
 
-      <Button
-        size="lg"
-        className="w-full"
-        disabled={outOfStock || !selectedVariant || addToCart.isPending}
-        onClick={handleAdd}
-      >
-        <ShoppingCart className="mr-2 size-5" />
-        {addToCart.isPending ? "Adding..." : "Add to cart"}
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          size="lg"
+          className="flex-1"
+          disabled={outOfStock || !selectedVariant || addToCart.isPending}
+          onClick={handleAdd}
+        >
+          <ShoppingCart className="mr-2 size-5" />
+          {addToCart.isPending ? "Adding..." : "Add to cart"}
+        </Button>
+        <WishlistButton
+          productId={product.id}
+          variantId={selectedVariant?.id}
+          className="size-11 rounded-lg"
+        />
+      </div>
     </div>
   );
 }

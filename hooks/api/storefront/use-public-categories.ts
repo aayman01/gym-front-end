@@ -7,15 +7,29 @@ const BASE_URL = "/public/categories";
 export const PUBLIC_CATEGORY_QUERY_KEYS = {
   all: ["public-categories"] as const,
   list: () => [...PUBLIC_CATEGORY_QUERY_KEYS.all, "list"] as const,
+  detail: (slug: string) =>
+    [...PUBLIC_CATEGORY_QUERY_KEYS.all, "detail", slug] as const,
 };
 
 export async function getPublicCategories() {
   return api.get<PublicCategory[]>(BASE_URL);
 }
 
+export async function getPublicCategory(slug: string) {
+  return api.get<PublicCategory>(`${BASE_URL}/${slug}`);
+}
+
 export function usePublicCategories() {
   return useQuery({
     queryKey: PUBLIC_CATEGORY_QUERY_KEYS.list(),
     queryFn: getPublicCategories,
+  });
+}
+
+export function usePublicCategory(slug: string) {
+  return useQuery({
+    queryKey: PUBLIC_CATEGORY_QUERY_KEYS.detail(slug),
+    queryFn: () => getPublicCategory(slug),
+    enabled: !!slug,
   });
 }

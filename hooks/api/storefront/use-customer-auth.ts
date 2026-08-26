@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type {
+  ChangePasswordInput,
   CustomerProfile,
   CustomerSession,
   UpdateProfileInput,
@@ -45,6 +46,10 @@ export async function updateProfile(payload: UpdateProfileInput) {
   return api.patch<CustomerProfile>(`${BASE}/me`, payload);
 }
 
+export async function changePassword(payload: ChangePasswordInput) {
+  return api.patch<null>(`${BASE}/password`, payload);
+}
+
 export function useCustomerSession() {
   return useQuery({
     queryKey: CUSTOMER_AUTH_QUERY_KEYS.session,
@@ -75,6 +80,7 @@ export function useLogout() {
     onSuccess: () => {
       queryClient.setQueryData(CUSTOMER_AUTH_QUERY_KEYS.session, null);
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
     },
   });
 }
@@ -86,5 +92,11 @@ export function useUpdateProfile() {
     onSuccess: (updated) => {
       queryClient.setQueryData(CUSTOMER_AUTH_QUERY_KEYS.session, updated);
     },
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: changePassword,
   });
 }
