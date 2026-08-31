@@ -83,7 +83,7 @@ export default function ProfilePage() {
   });
 
   return (
-    <div className="max-w-lg space-y-6">
+    <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -91,6 +91,7 @@ export default function ProfilePage() {
         </p>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-2">
       <form
         onSubmit={onSubmit}
         className="space-y-4 rounded-2xl border border-border/60 bg-card/60 p-6"
@@ -206,6 +207,7 @@ export default function ProfilePage() {
           )}
         </Button>
       </form>
+      </div>
     </div>
   );
 }

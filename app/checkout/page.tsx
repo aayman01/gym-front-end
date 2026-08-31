@@ -420,17 +420,21 @@ export default function CheckoutPage() {
 
             <section className="space-y-4 rounded-2xl border border-border/60 bg-card/60 p-6">
               <h2 className="font-semibold">Payment method</h2>
-              <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
-                <Package className="size-5 text-primary" />
-                <div>
-                  <p className="text-sm font-medium">
-                    {codMethod?.name ?? "Cash on Delivery"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Pay when your order arrives
-                  </p>
+              {codMethod ? (
+                <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                  <Package className="size-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">{codMethod.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Pay when your order arrives
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <p className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-muted-foreground">
+                  No payment method available. Please contact support or try again later.
+                </p>
+              )}
             </section>
 
             <div className="space-y-1.5">

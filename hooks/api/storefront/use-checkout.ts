@@ -1,5 +1,6 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { CART_QUERY_KEYS } from "@/hooks/api/storefront/use-cart";
 import type {
   CheckoutPreview,
   PaymentMethod,
@@ -74,7 +75,11 @@ export function usePreviewCheckout(params: {
 }
 
 export function usePlaceOrder() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: placeOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEYS.all });
+    },
   });
 }

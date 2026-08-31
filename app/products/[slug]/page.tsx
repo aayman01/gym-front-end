@@ -32,7 +32,7 @@ function ProductDetailLoader({ slug }: { slug: string }) {
 
 function ProductDetailSkeleton() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
+    <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
       <div className="mb-6 h-4 w-32 animate-pulse rounded-full bg-muted/40" />
       <div className="grid gap-10 md:grid-cols-2">
         <div className="aspect-square w-full animate-pulse rounded-2xl bg-muted/40" />

@@ -62,14 +62,16 @@ export function ProductDetailView({ product }: Props) {
                   <span className="font-medium">{rating.toFixed(1)}</span>
                 </div>
               )}
-              <Link href={`/categories/${product.category.slug}`}>
-                <Badge
-                  variant="secondary"
-                  className="cursor-pointer transition-colors hover:bg-secondary/70"
-                >
-                  {product.category.name}
-                </Badge>
-              </Link>
+              {product.category ? (
+                <Link href={`/categories/${product.category.slug}`}>
+                  <Badge
+                    variant="secondary"
+                    className="cursor-pointer transition-colors hover:bg-secondary/70"
+                  >
+                    {product.category.name}
+                  </Badge>
+                </Link>
+              ) : null}
               <Badge variant="outline">{product.sellingUnit}</Badge>
             </div>
           </div>

@@ -11,4 +11,8 @@ export type PublicSiteSettings = {
   footerLogoUrl: string | null;
   emailLogoUrl: string | null;
   faviconUrl: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+  contactAddress: string | null;
+  contactFormEnabled: boolean;
 };

@@ -24,7 +24,7 @@ export default function RootLayout({
       lang="en"
       className={`${lexend.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-dvh flex-col">
         <Providers>
           <SiteShell>{children}</SiteShell>
         </Providers>

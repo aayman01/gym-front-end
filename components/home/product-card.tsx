@@ -53,14 +53,16 @@ export function ProductCard({ product, className }: ProductCardProps) {
               <Package className="size-12 text-primary/70" />
             </div>
           )}
-          <Link
-            href={`/categories/${product.category.slug}`}
-            className="absolute left-3 top-3 z-10"
-          >
-            <Badge className="bg-background/80 text-foreground backdrop-blur-sm transition-colors hover:bg-primary hover:text-primary-foreground">
-              {product.category.name}
-            </Badge>
-          </Link>
+          {product.category ? (
+            <Link
+              href={`/categories/${product.category.slug}`}
+              className="absolute left-3 top-3 z-10"
+            >
+              <Badge className="bg-background/80 text-foreground backdrop-blur-sm transition-colors hover:bg-primary hover:text-primary-foreground">
+                {product.category.name}
+              </Badge>
+            </Link>
+          ) : null}
           <WishlistButton
             productId={product.id}
             className="absolute right-3 top-3 z-10"

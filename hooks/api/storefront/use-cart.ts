@@ -3,7 +3,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { ApiError } from "@/lib/api-client";
 import type {
   Cart,
   CartItem,
@@ -88,6 +90,16 @@ export function useRemoveCartItem() {
     mutationFn: (itemId: string) => removeCartItem(itemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEYS.all });
+    },
+    onError: (error) => {
+      const status = error instanceof ApiError ? error.status : undefined;
+      // Stale UI after place-order (or concurrent delete) — refresh cart
+      if (status === 404) {
+        void queryClient.invalidateQueries({ queryKey: CART_QUERY_KEYS.all });
+      }
+      toast.error(
+        error instanceof Error ? error.message : "Failed to remove item",
+      );
     },
   });
 }

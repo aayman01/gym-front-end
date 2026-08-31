@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-full flex-1 flex-col">
+    <div className="flex min-h-dvh flex-1 flex-col">
       <SiteHeader />
       <main className="flex-1 pt-[var(--site-header-height)]">{children}</main>
       <SiteFooter />

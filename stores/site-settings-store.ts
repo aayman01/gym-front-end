@@ -28,6 +28,10 @@ const defaultSettings: PublicSiteSettings = {
   footerLogoUrl: null,
   emailLogoUrl: null,
   faviconUrl: null,
+  contactPhone: null,
+  contactEmail: null,
+  contactAddress: null,
+  contactFormEnabled: true,
 };
 
 function setMetaTag(name: string, content: string) {
