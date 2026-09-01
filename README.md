@@ -1,36 +1,158 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gym Storefront (gym-front-end)
 
-## Getting Started
+Customer-facing e-commerce storefront for a gym/supplements brand. Part of the gym e-commerce platform alongside [gym-back](../gym-back) (API) and [gym-admin](../gym-admin) (admin dashboard).
 
-First, run the development server:
+The UI uses the **Crimson Forge** theme with dynamic branding loaded from backend site settings.
+
+---
+
+## Features
+
+- **Homepage** — hero banners, category showcase, featured products, benefits, social proof
+- **Catalog** — browse, search, filter, and sort products
+- **Product detail** — gallery, variants, reviews, add to cart / wishlist
+- **Categories & brands** — filtered product listings by slug
+- **Cart & checkout** — cart drawer, full cart page, shipping/payment selection, coupons, place order
+- **Wishlist** — save and merge items across sessions
+- **Auth & account** — login, register, profile, addresses, order history, returns, reviews
+- **Contact** — public contact form
+
+---
+
+## Tech stack
+
+| Layer | Choice |
+|-------|--------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| UI | React 19, Tailwind CSS 4, shadcn/ui, `@base-ui/react` |
+| Data fetching | TanStack React Query 5, axios |
+| Forms | react-hook-form, zod |
+| State | Zustand (cart drawer, site settings) |
+| Animation | Motion, Lenis smooth scroll |
+| Icons / toasts | lucide-react, sonner |
+
+---
+
+## Prerequisites
+
+- Node.js 20+
+- [pnpm](https://pnpm.io/)
+- [gym-back](../gym-back) running locally (PostgreSQL, Cloudinary, env configured)
+
+---
+
+## Local development
+
+Recommended port layout when running the full platform:
+
+| Service | URL |
+|---------|-----|
+| Backend API | `http://localhost:4000/api/v1` |
+| Storefront (this repo) | `http://localhost:3000` |
+| Admin dashboard | `http://localhost:5173` |
+
+**Setup:**
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Production build:**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm build
+pnpm start
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Environment variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `NEXT_PUBLIC_API_URL` | Backend API base URL | `http://localhost:4000/api/v1` |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Copy `.env.example` to `.env.local` and adjust if your backend runs on a different host or port.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Script | Command | Purpose |
+|--------|---------|---------|
+| `dev` | `next dev` | Development server |
+| `build` | `next build` | Production build |
+| `start` | `next start` | Serve production build |
+| `lint` | `eslint` | Lint |
+| `stitch:fetch-product-list` | `node scripts/fetch-stitch-screen.mjs` | Fetch Stitch design screen |
+
+---
+
+## Project structure
+
+```
+app/                    # Next.js App Router pages and layouts
+components/
+├── ui/                 # shadcn primitives
+├── layout/             # SiteHeader, SiteFooter, SiteShell
+├── home/               # Homepage sections
+├── products/           # Catalog, PDP, filters
+└── cart/               # Cart drawer
+hooks/
+├── api/storefront/     # React Query hooks per API domain
+└── use-filter-params.ts
+lib/                    # api-client, api wrapper, utils
+stores/                 # Zustand stores
+types/                  # API and domain types
+config/                 # Env-based config
+public/                 # Static assets
+```
+
+---
+
+## Routes
+
+| Route | Description |
+|-------|-------------|
+| `/` | Homepage |
+| `/products` | Product catalog with filters |
+| `/products/[slug]` | Product detail |
+| `/categories/[slug]` | Category-filtered products |
+| `/brands/[slug]` | Brand-filtered products |
+| `/cart` | Full cart page |
+| `/checkout` | Checkout flow |
+| `/wishlist` | Wishlist |
+| `/login`, `/register` | Authentication |
+| `/contact` | Contact form |
+| `/account` | Account overview (auth required) |
+| `/account/profile` | Edit profile and password |
+| `/account/addresses` | Manage addresses |
+| `/account/orders` | Order history |
+| `/account/orders/[orderId]` | Order detail, reviews, returns |
+
+Account routes redirect unauthenticated users to `/login?redirect=...` via `app/account/layout.tsx`.
+
+---
+
+## API integration
+
+The browser calls [gym-back](../gym-back) directly — there are no Next.js API routes or BFF layer.
+
+- **Client:** `lib/api-client.ts` — axios with `withCredentials: true`, CSRF header on mutations
+- **Hooks:** `hooks/api/storefront/*` — React Query wrappers
+- **Response shape:** `{ success, message, data }` unwrapped by `lib/api.ts`
+
+### Public endpoints (`/public/*`)
+
+Site settings, banners, collections, categories, brands, products, reviews, contact form.
+
+### Authenticated endpoints (`/user/*`)
+
+Auth, cart, wishlist, checkout, addresses, orders, returns, reviews.
+
+See [gym-back/docs/storefront-api-paths.md](../gym-back/docs/storefront-api-paths.md) for detailed API reference.
