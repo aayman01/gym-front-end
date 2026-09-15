@@ -216,13 +216,12 @@ export default function CheckoutPage() {
     }
   }, [customer, savedAddresses, reset]);
 
-  useEffect(() => {
-    if (!appliedCoupon || !previewError) return;
+  if (appliedCoupon && previewError) {
     toast.error(
       (previewErr as { message?: string })?.message ?? "Could not apply coupon",
     );
     setAppliedCoupon(undefined);
-  }, [appliedCoupon, previewError, previewErr]);
+  }
 
   const handleAddressSelect = (addr: CustomerAddress) => {
     reset((prev) => ({

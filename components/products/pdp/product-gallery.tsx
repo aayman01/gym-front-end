@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Package, Star, Truck } from "lucide-react";
+import { ChevronLeft, ChevronRight, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicProductDetail } from "@/types/storefront";
 
